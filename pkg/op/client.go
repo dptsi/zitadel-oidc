@@ -120,8 +120,28 @@ func ClientBasicAuth(r *http.Request, storage Storage) (clientID string, err err
 	}
 	encoded := splittedHeader[1]
 
+	encodings := []*base64.Encoding{
+		base64.StdEncoding,
+		base64.URLEncoding,
+		base64.RawStdEncoding,
+		base64.RawURLEncoding,
+	}
+
 	// Ignore error
-	decoded, _ := base64.RawStdEncoding.DecodeString(encoded)
+	var decoded string
+
+	for _, encoding := range encodings {
+		decodedBytes, tmpErr := encoding.DecodeString(encoded)
+		err = tmpErr
+
+		if err == nil {
+			decoded = string(decodedBytes)
+			break
+		}
+	}
+	if err != nil {
+		return "", oidc.ErrInvalidClient().WithParent(ErrInvalidAuthHeader)
+	}
 	splittedCreds := strings.Split(string(decoded), ":")
 	if len(splittedCreds) != 2 {
 		return "", oidc.ErrInvalidClient().WithParent(ErrInvalidAuthHeader)
