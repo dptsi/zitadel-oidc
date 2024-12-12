@@ -2,9 +2,11 @@ package op
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	httphelper "github.com/zitadel/oidc/v3/pkg/http"
@@ -111,10 +113,21 @@ func ClientBasicAuth(r *http.Request, storage Storage) (clientID string, err err
 	r = r.WithContext(ctx)
 	defer span.End()
 
-	clientID, clientSecret, ok := r.BasicAuth()
-	if !ok {
-		return "", oidc.ErrInvalidClient().WithParent(ErrNoClientCredentials)
+	authHeader := r.Header.Get("Authorization")
+	splittedHeader := strings.Split(authHeader, " ")
+	if len(splittedHeader) != 2 || !strings.EqualFold(splittedHeader[0], "basic") {
+		return "", oidc.ErrInvalidClient().WithParent(ErrInvalidAuthHeader)
 	}
+	encoded := splittedHeader[1]
+
+	// Ignore error
+	decoded, _ := base64.RawStdEncoding.DecodeString(encoded)
+	splittedCreds := strings.Split(string(decoded), ":")
+	if len(splittedCreds) != 2 {
+		return "", oidc.ErrInvalidClient().WithParent(ErrInvalidAuthHeader)
+	}
+
+	clientID, clientSecret := splittedCreds[0], splittedCreds[1]
 	clientID, err = url.QueryUnescape(clientID)
 	if err != nil {
 		return "", oidc.ErrInvalidClient().WithParent(ErrInvalidAuthHeader)
