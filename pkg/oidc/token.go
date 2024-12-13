@@ -237,7 +237,6 @@ type AccessTokenResponse struct {
 	IDToken      string              `json:"id_token,omitempty" schema:"id_token,omitempty"`
 	State        string              `json:"state,omitempty" schema:"state,omitempty"`
 	Scope        SpaceDelimitedArray `json:"scope,omitempty" schema:"scope,omitempty"`
-	SessionState string              `json:"session_state,omitempty" schema:"session_state,omitempty"`
 }
 
 type JWTProfileAssertionClaims struct {

@@ -181,7 +181,6 @@ type Endpoints struct {
 	Userinfo            *Endpoint
 	Revocation          *Endpoint
 	EndSession          *Endpoint
-	CheckSessionIframe  *Endpoint
 	JwksURI             *Endpoint
 	DeviceAuthorization *Endpoint
 }
@@ -333,10 +332,6 @@ func (o *Provider) RevocationEndpoint() *Endpoint {
 
 func (o *Provider) EndSessionEndpoint() *Endpoint {
 	return o.endpoints.EndSession
-}
-
-func (o *Provider) CheckSessionIframeEndpoint() *Endpoint {
-	return o.endpoints.CheckSessionIframe
 }
 
 func (o *Provider) DeviceAuthorizationEndpoint() *Endpoint {
@@ -563,16 +558,6 @@ func WithCustomEndSessionEndpoint(endpoint *Endpoint) Option {
 			return err
 		}
 		o.endpoints.EndSession = endpoint
-		return nil
-	}
-}
-
-func WithCustomCheckSessionIframeEndpoint(endpoint *Endpoint) Option {
-	return func(o *Provider) error {
-		if err := endpoint.Validate(); err != nil {
-			return err
-		}
-		o.endpoints.CheckSessionIframe = endpoint
 		return nil
 	}
 }

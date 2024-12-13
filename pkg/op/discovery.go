@@ -35,10 +35,6 @@ func Discover(w http.ResponseWriter, config *oidc.DiscoveryConfiguration) {
 
 func CreateDiscoveryConfig(ctx context.Context, config Configuration, storage DiscoverStorage) *oidc.DiscoveryConfiguration {
 	issuer := IssuerFromContext(ctx)
-	checkSessionIframeEndpoint := ""
-	if config.CheckSessionIframeEndpoint() != nil {
-		checkSessionIframeEndpoint = config.CheckSessionIframeEndpoint().Absolute(issuer)
-	}
 	return &oidc.DiscoveryConfiguration{
 		Issuer:                                     issuer,
 		AuthorizationEndpoint:                      config.AuthorizationEndpoint().Absolute(issuer),
@@ -67,16 +63,11 @@ func CreateDiscoveryConfig(ctx context.Context, config Configuration, storage Di
 		RequestParameterSupported:                          config.RequestObjectSupported(),
 		BackChannelLogoutSupported:                         config.BackChannelLogoutSupported(),
 		BackChannelLogoutSessionSupported:                  config.BackChannelLogoutSessionSupported(),
-		CheckSessionIframe:                                 checkSessionIframeEndpoint,
 	}
 }
 
 func createDiscoveryConfigV2(ctx context.Context, config Configuration, storage DiscoverStorage, endpoints *Endpoints) *oidc.DiscoveryConfiguration {
 	issuer := IssuerFromContext(ctx)
-	checkSessionIframeEndpoint := ""
-	if endpoints.CheckSessionIframe != nil {
-		checkSessionIframeEndpoint = endpoints.CheckSessionIframe.Absolute(issuer)
-	}
 	return &oidc.DiscoveryConfiguration{
 		Issuer:                                     issuer,
 		AuthorizationEndpoint:                      endpoints.Authorization.Absolute(issuer),
@@ -105,7 +96,6 @@ func createDiscoveryConfigV2(ctx context.Context, config Configuration, storage 
 		RequestParameterSupported:                          config.RequestObjectSupported(),
 		BackChannelLogoutSupported:                         config.BackChannelLogoutSupported(),
 		BackChannelLogoutSessionSupported:                  config.BackChannelLogoutSessionSupported(),
-		CheckSessionIframe:                                 checkSessionIframeEndpoint,
 	}
 }
 

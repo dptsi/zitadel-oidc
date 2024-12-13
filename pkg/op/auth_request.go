@@ -39,10 +39,6 @@ type AuthRequest interface {
 	Done() bool
 }
 
-type CanGetSessionState interface {
-	GetSessionState() string
-}
-
 type Authorizer interface {
 	Storage() Storage
 	Decoder() httphelper.Decoder
@@ -484,16 +480,12 @@ func AuthResponseCode(w http.ResponseWriter, r *http.Request, authReq AuthReques
 		return
 	}
 	type codeResponseType struct {
-		Code         string `schema:"code"`
-		State        string `schema:"state,omitempty"`
-		SessionState string `schema:"session_state,omitempty"`
+		Code  string `schema:"code"`
+		State string `schema:"state,omitempty"`
 	}
 	codeResponse := codeResponseType{
 		Code:  code,
 		State: authReq.GetState(),
-	}
-	if canGetSessionState, ok := authReq.(CanGetSessionState); ok {
-		codeResponse.SessionState = canGetSessionState.GetSessionState()
 	}
 
 	if authReq.GetResponseMode() == oidc.ResponseModeFormPost {
@@ -525,9 +517,6 @@ func AuthResponseToken(w http.ResponseWriter, r *http.Request, authReq AuthReque
 	if err != nil {
 		AuthRequestError(w, r, authReq, err, authorizer)
 		return
-	}
-	if canGetSessionState, ok := authReq.(CanGetSessionState); ok {
-		resp.SessionState = canGetSessionState.GetSessionState()
 	}
 
 	if authReq.GetResponseMode() == oidc.ResponseModeFormPost {
